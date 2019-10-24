@@ -624,56 +624,45 @@ public class CLKernelExecutor {
     this.anchorClass = anchorClass;
   }
 
-  protected ClearCLKernel getKernel(ClearCLContext context,
-                                    String programFilename,
-                                    String kernelName,
-                                    Map<String, Object> defines) throws IOException,
-                                                                 NullPointerException,
-                                                                 CLKernelException
-  {
-    String programCacheKey = anchorClass.getCanonicalName() + " "
-                             + programFilename;
-    for (String key : defines.keySet())
-    {
-      programCacheKey = programCacheKey + " "
-                        + (key + " = " + defines.get(key));
-    }
-    if (DEBUG)
-    {
-      System.out.println("Program cache hash:" + programCacheKey);
-    }
-    ClearCLProgram clProgram =
-                             this.programCacheMap.get(programCacheKey);
-    if (clProgram == null)
-    {
-      clProgram = context.createProgram(this.anchorClass, new String[]
-      { programFilename });
-      for (Map.Entry<String, Object> entry : defines.entrySet())
-      {
-        if (entry.getValue() instanceof String)
-        {
-          clProgram.addDefine((String) entry.getKey(),
-                              (String) entry.getValue());
-        }
-        else if (entry.getValue() instanceof Number)
-        {
-          clProgram.addDefine((String) entry.getKey(),
-                              (Number) entry.getValue());
-        }
-        else if (entry.getValue() == null)
-        {
-          clProgram.addDefine((String) entry.getKey());
-        }
+   protected ClearCLKernel getKernel(ClearCLContext context,
+           String programFilename,
+           String kernelName,
+           Map<String, Object> defines) throws IOException,
+           NullPointerException,
+           CLKernelException {
+      String programCacheKey = anchorClass.getCanonicalName() + " "
+              + programFilename;
+      for (String key : defines.keySet()) {
+         programCacheKey = programCacheKey + " "
+                 + (key + " = " + defines.get(key));
+      }
+      if (DEBUG) {
+         System.out.println("Program cache hash:" + programCacheKey);
+      }
+      ClearCLProgram clProgram
+              = this.programCacheMap.get(programCacheKey);
+      if (clProgram == null) {
+         clProgram = context.createProgram(this.anchorClass, new String[]{programFilename});
+         for (Map.Entry<String, Object> entry : defines.entrySet()) {
+            if (entry.getValue() instanceof String) {
+               clProgram.addDefine((String) entry.getKey(),
+                       (String) entry.getValue());
+            } else if (entry.getValue() instanceof Number) {
+               clProgram.addDefine((String) entry.getKey(),
+                       (Number) entry.getValue());
+            } else if (entry.getValue() == null) {
+               clProgram.addDefine((String) entry.getKey());
+            }
+         }
+
+         clProgram.addBuildOptionAllMathOpt();
+         clProgram.buildAndLog();
+
+         programCacheMap.put(programCacheKey, clProgram);
       }
 
-      clProgram.addBuildOptionAllMathOpt();
-      clProgram.buildAndLog();
-
-      programCacheMap.put(programCacheKey, clProgram);
-    }
-
-    return clProgram.createKernel(kernelName);
-    /*
+      return clProgram.createKernel(kernelName);
+      /*
     try
     {
       return clProgram.createKernel(kernelName);
@@ -683,8 +672,8 @@ public class CLKernelExecutor {
       throw new CLKernelException("Error creating kernel: "
                                   + kernelName);
     }
-*/
-  }
+       */
+   }
 
   public void close() throws IOException
   {
