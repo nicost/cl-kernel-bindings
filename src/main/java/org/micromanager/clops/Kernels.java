@@ -94,7 +94,7 @@ public class Kernels
       throw new IllegalArgumentException("Error: number of dimensions don't match! (addImages)");
     }
     clke.execute(OCLlib.class,
-                 "kernels/math.cl",
+                 "kernels/math" + src.getDimension() + "D.cl",
                  "addPixelwise_" + src.getDimension() + "d",
                  parameters);
   }
@@ -130,7 +130,7 @@ public class Kernels
     }
 
     clke.execute(OCLlib.class,
-                 "kernels/math.cl",
+                 "kernels/math" + src.getDimension() + "D.cl",
                  "addScalar_" + src.getDimension() + "d",
                  parameters);
   }
@@ -173,20 +173,15 @@ public class Kernels
     {
       throw new IllegalArgumentException("Error: number of dimensions don't match! (addImageAndScalar)");
     }
+    String kAndFname = (new StringBuffer("addWeightedPixelwise_").
+            append(src.getDimension()).append("d")).toString();
     clke.execute(OCLlib.class,
-                 "kernels/math.cl",
-                 "addWeightedPixelwise_" + src.getDimension() + "d",
+                 "kernels/" + kAndFname + ".cl",
+                 kAndFname,
                  parameters);
   }
 
-  /*
-    public static void affineTransform(CLKernelExecutor clke, ClearCLBuffer src, ClearCLBuffer dst, AffineTransform3D at) {
-        at = at.inverse();
-        float[] matrix = AffineTransform.matrixToFloatArray(at);
-        return affineTransform(clke, src, dst, matrix);
-    }
-    */
-
+  
   /**
    * Applies the given affine-transform to the input image
    * 
@@ -332,11 +327,10 @@ public class Kernels
     parameters.put("src", src);
     parameters.put("dst_max", dst_max);
     parameters.put("dst_arg", dst_arg);
-
+    
+    String fAndKName = "arg_max_project_3d_2d";
     clke.execute(OCLlib.class,
-                 "kernels/projections.cl",
-                 "arg_max_project_3d_2d",
-                 parameters);
+                 "kernels/" + fAndKName + ".cl", fAndKName, parameters);
   }
 
   /**
@@ -367,7 +361,7 @@ public class Kernels
     parameters.put("dst", dst);
 
     clke.execute(OCLlib.class,
-                 "kernels/binaryProcessing.cl",
+                 "kernels/binaryProcessing" + src1.getDimension() + "D.cl",
                  "binary_and_" + src1.getDimension() + "d",
                  parameters);
   }
@@ -1946,7 +1940,7 @@ public class Kernels
       throw new IllegalArgumentException("Error: number of dimensions don't match! (minimumImages)");
     }
     clke.execute(OCLlib.class,
-                 "kernels/math.cl",
+                 "kernels/math" + + src.getDimension() + "D.cl",
                  "minPixelwise_" + src.getDimension() + "d",
                  parameters);
   }
@@ -2955,7 +2949,7 @@ public class Kernels
    * @throws CLKernelException
    */
   public static void set(CLKernelExecutor clke,
-                         ClearCLImage clImage,
+                         ClearCLImageInterface clImage,
                          Float value) throws CLKernelException
   {
     HashMap<String, Object> parameters = new HashMap<>();
@@ -2967,7 +2961,7 @@ public class Kernels
                  "set_" + clImage.getDimension() + "d",
                  parameters);
   }
-  
+  /*
   public static void set(CLKernelExecutor clij, ClearCLBuffer clImage, Float value) throws CLKernelException {
         HashMap<String, Object> parameters = new HashMap<>();
         parameters.put("dst", clImage);
@@ -2975,6 +2969,7 @@ public class Kernels
 
         clij.execute(OCLlib.class, "kernels/set.cl", "set_" + clImage.getDimension() + "d", parameters);
     }
+  */
 
   /**
    * Splits a given input image stack into n output image stacks by

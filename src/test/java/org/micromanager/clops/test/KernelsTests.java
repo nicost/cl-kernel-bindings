@@ -67,7 +67,8 @@ public class KernelsTests
     ClearCL lClearCL = new ClearCL(lClearCLBackend);
 
     // initialisation with the first device found
-    ClearCLDevice lBestGPUDevice = lClearCL.getAllDevices().get(0);
+    //ClearCLDevice lBestGPUDevice = lClearCL.getAllDevices().get(0);
+    ClearCLDevice lBestGPUDevice = lClearCL.getBestGPUDevice();
 
     gCLContext = lBestGPUDevice.createContext();
 
@@ -156,8 +157,7 @@ public class KernelsTests
       Assert.fail(clkExc.getMessage());
     }
   }
-  
-  /*
+
 
   @Test
   public void testAddImages() throws IOException
@@ -240,6 +240,7 @@ public class KernelsTests
     }
   }
 
+
   @Test
   public void testAddImageAndScalar() throws IOException
   {
@@ -271,6 +272,8 @@ public class KernelsTests
       Assert.fail(clkExc.getMessage());
     }
   }
+
+      
 
   @Test
   public void testArgMaximumZProjection()
@@ -620,9 +623,8 @@ public class KernelsTests
 
     lCLImage.close();
   }
-  */
 
-  /*
+
   @Test
   public void testPhantomImages() throws IOException
   {
@@ -645,6 +647,5 @@ public class KernelsTests
       Assert.fail(clkExc.getMessage());
     }
   }
- */
 
 }
