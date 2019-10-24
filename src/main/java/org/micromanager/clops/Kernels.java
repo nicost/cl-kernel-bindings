@@ -3255,7 +3255,7 @@ public class Kernels
     parameters.put("src", src);
     parameters.put("dst", dst);
     clke.execute(OCLlib.class,
-                 "kernels/projections.cl",
+                 "kernels/sum_projections.cl",
                  "sum_project_3d_2d",
                  parameters);
   }
