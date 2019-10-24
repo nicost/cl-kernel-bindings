@@ -14,6 +14,7 @@ import net.haesleinhuepf.clij.clearcl.enums.HostAccessType;
 import net.haesleinhuepf.clij.clearcl.enums.ImageChannelDataType;
 import net.haesleinhuepf.clij.clearcl.enums.KernelAccessType;
 import net.haesleinhuepf.clij.clearcl.enums.MemAllocMode;
+import net.haesleinhuepf.clij.clearcl.exceptions.OpenCLException;
 import net.haesleinhuepf.clij.clearcl.ocllib.OCLlib;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.haesleinhuepf.clij.coremem.offheap.OffHeapMemory;
@@ -64,7 +65,7 @@ public class KernelsTests {
       ClearCL lClearCL = new ClearCL(lClearCLBackend);
 
       // initialisation with the first device found
-      //ClearCLDevice lBestGPUDevice = lClearCL.getAllDevices().get(0);
+      // ClearCLDevice lBestGPUDevice = lClearCL.getAllDevices().get(0);
       ClearCLDevice lBestGPUDevice = lClearCL.getBestGPUDevice();
 
       gCLContext = lBestGPUDevice.createContext();
@@ -74,49 +75,63 @@ public class KernelsTests {
 
       // create src and dst images and buffers for all types to speed up testing
       // and reduce testing code
-      srcFloat = gCLKE.createCLImage(dimensions2D,
-              ImageChannelDataType.Float);
-      dstFloat = gCLKE.createCLImage(srcFloat);
-      srcUByte = gCLKE.createCLImage(dimensions2D,
-              ImageChannelDataType.UnsignedInt8);
-      dstUByte = gCLKE.createCLImage(srcUByte);
-      srcUShort
-              = gCLKE.createCLImage(dimensions2D,
-                      ImageChannelDataType.UnsignedInt16);
-      dstUShort = gCLKE.createCLImage(srcUShort);
+      try {
+         srcBufFloat = gCLKE.createCLBuffer(dimensions2D,
+                 NativeTypeEnum.Float);
+         dstBufFloat = gCLKE.createCLBuffer(srcBufFloat);
+         srcBufUByte = gCLKE.createCLBuffer(dimensions2D,
+                 NativeTypeEnum.UnsignedByte);
+         dstBufUByte = gCLKE.createCLBuffer(srcBufUByte);
+         srcBufUShort = gCLKE.createCLBuffer(dimensions2D,
+                 NativeTypeEnum.UnsignedShort);
+         dstBufUShort = gCLKE.createCLBuffer(srcBufUShort);
+        
+         
+         srcFloat = gCLKE.createCLImage(dimensions2D,
+                 ImageChannelDataType.Float);
+         dstFloat = gCLKE.createCLImage(srcFloat);
+         srcUByte = gCLKE.createCLImage(dimensions2D,
+                 ImageChannelDataType.UnsignedInt8);
+         dstUByte = gCLKE.createCLImage(srcUByte);
+         srcUShort
+                 = gCLKE.createCLImage(dimensions2D,
+                         ImageChannelDataType.UnsignedInt16);
+         dstUShort = gCLKE.createCLImage(srcUShort);  
+         dstFloat3D = gCLKE.createCLImage(dimensions3D,
+                 ImageChannelDataType.Float); 
 
-      srcBufFloat = gCLKE.createCLBuffer(dimensions2D,
-              NativeTypeEnum.Float);
-      dstBufFloat = gCLKE.createCLBuffer(srcBufFloat);
-      srcBufUByte = gCLKE.createCLBuffer(dimensions2D,
-              NativeTypeEnum.UnsignedByte);
-      dstBufUByte = gCLKE.createCLBuffer(srcBufUByte);
-      srcBufUShort = gCLKE.createCLBuffer(dimensions2D,
-              NativeTypeEnum.UnsignedShort);
-      dstBufUShort = gCLKE.createCLBuffer(srcBufUShort);
-
-      srcImages = new ClearCLImage[]{srcFloat, srcUByte, srcUShort};
-      dstImages = new ClearCLImage[]{dstFloat, dstUByte, dstUShort};
-      srcBuffers = new ClearCLBuffer[]{srcBufFloat, srcBufUByte, srcBufUShort};
-      dstBuffers = new ClearCLBuffer[]{dstBufFloat, dstBufUByte, dstBufUShort};
-      dstFloat3D = gCLKE.createCLImage(dimensions3D,
-              ImageChannelDataType.Float);
+      } catch (OpenCLException cle) {
+         Assert.fail(cle.getMessage());
+      } finally {
+         srcImages = new ClearCLImage[]{srcFloat, srcUByte, srcUShort};
+         dstImages = new ClearCLImage[]{dstFloat, dstUByte, dstUShort};
+         srcBuffers = new ClearCLBuffer[]{srcBufFloat, srcBufUByte, srcBufUShort};
+         dstBuffers = new ClearCLBuffer[]{dstBufFloat, dstBufUByte, dstBufUShort};
+      }
 
    }
 
    @After
    public void cleanupKernelTests() throws IOException {
       for (ClearCLImage clImg : srcImages) {
-         clImg.close();
+         if (clImg != null) {
+            clImg.close();
+         }
       }
       for (ClearCLImage clImg : dstImages) {
-         clImg.close();
+         if (clImg != null) {
+            clImg.close();
+         }
       }
       for (ClearCLBuffer clBuf : srcBuffers) {
-         clBuf.close();
+         if (clBuf != null) {
+            clBuf.close();
+         }
       }
       for (ClearCLBuffer clBuf : dstBuffers) {
-         clBuf.close();
+         if (clBuf != null) {
+            clBuf.close();
+         }
       }
 
       gCLKE.close();
