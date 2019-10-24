@@ -2973,7 +2973,7 @@ public class Kernels
         parameters.put("dst", clImage);
         parameters.put("value", value);
 
-        clij.execute(Kernels.class, "set.cl", "set_" + clImage.getDimension() + "d", parameters);
+        clij.execute(OCLlib.class, "kernels/set.cl", "set_" + clImage.getDimension() + "d", parameters);
     }
 
   /**

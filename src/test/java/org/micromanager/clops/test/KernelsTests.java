@@ -66,7 +66,8 @@ public class KernelsTests
 
     ClearCL lClearCL = new ClearCL(lClearCLBackend);
 
-    ClearCLDevice lBestGPUDevice = lClearCL.getBestGPUDevice();
+    // initialisation with the first device found
+    ClearCLDevice lBestGPUDevice = lClearCL.getAllDevices().get(0);
 
     gCLContext = lBestGPUDevice.createContext();
 
