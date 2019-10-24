@@ -70,8 +70,7 @@ public class KernelsTests {
 
       gCLContext = lBestGPUDevice.createContext();
 
-      gCLKE = new CLKernelExecutor(gCLContext,
-              OCLlib.class);
+      gCLKE = new CLKernelExecutor(gCLContext, OCLlib.class);
 
       // create src and dst images and buffers for all types to speed up testing
       // and reduce testing code
@@ -85,8 +84,14 @@ public class KernelsTests {
          srcBufUShort = gCLKE.createCLBuffer(dimensions2D,
                  NativeTypeEnum.UnsignedShort);
          dstBufUShort = gCLKE.createCLBuffer(srcBufUShort);
-        
-         
+       } catch (OpenCLException cle) {
+         Assert.fail(cle.getMessage());
+      } finally {
+         srcBuffers = new ClearCLBuffer[]{srcBufFloat, srcBufUByte, srcBufUShort};
+         dstBuffers = new ClearCLBuffer[]{dstBufFloat, dstBufUByte, dstBufUShort};
+      }
+      
+      try {         
          srcFloat = gCLKE.createCLImage(dimensions2D,
                  ImageChannelDataType.Float);
          dstFloat = gCLKE.createCLImage(srcFloat);
@@ -99,14 +104,11 @@ public class KernelsTests {
          dstUShort = gCLKE.createCLImage(srcUShort);  
          dstFloat3D = gCLKE.createCLImage(dimensions3D,
                  ImageChannelDataType.Float); 
-
       } catch (OpenCLException cle) {
-         Assert.fail(cle.getMessage());
+         System.out.println("Context: " + lBestGPUDevice.getName() + " does not support CLImages");
       } finally {
          srcImages = new ClearCLImage[]{srcFloat, srcUByte, srcUShort};
          dstImages = new ClearCLImage[]{dstFloat, dstUByte, dstUShort};
-         srcBuffers = new ClearCLBuffer[]{srcBufFloat, srcBufUByte, srcBufUShort};
-         dstBuffers = new ClearCLBuffer[]{dstBufFloat, dstBufUByte, dstBufUShort};
       }
 
    }
@@ -143,13 +145,15 @@ public class KernelsTests {
    public void testAbsolute() throws IOException {
       // Todo: check unsigned integer types?
       try {
-         Kernels.set(gCLKE, srcFloat, -3.0f);
-         Kernels.absolute(gCLKE, srcFloat, dstFloat);
-         float[] minMax = Kernels.minMax(gCLKE, dstFloat, 36);
-         Assert.assertEquals(3.0f, minMax[0], 0.000001);
+         if (srcFloat != null && dstFloat != null) {
+            Kernels.set(gCLKE, srcFloat, -3.0f);
+            Kernels.absolute(gCLKE, srcFloat, dstFloat);
+            float[] minMax = Kernels.minMax(gCLKE, dstFloat, 36);
+            Assert.assertEquals(3.0f, minMax[0], 0.000001);
+         }
          Kernels.set(gCLKE, srcBufFloat, -5.0f);
          Kernels.absolute(gCLKE, srcBufFloat, dstBufFloat);
-         minMax = Kernels.minMax(gCLKE, dstBufFloat, 36);
+         float[] minMax = Kernels.minMax(gCLKE, dstBufFloat, 36);
          Assert.assertEquals(5.0f, minMax[0], 0.000001);
       } catch (CLKernelException clkExc) {
          Assert.fail(clkExc.getMessage());
@@ -160,14 +164,16 @@ public class KernelsTests {
    public void testAddImages() throws IOException {
       try {
          for (int i = 0; i < srcImages.length; i++) {
-            float[] minMax;
-            try (ClearCLImage src2 = gCLKE.createCLImage(srcImages[i])) {
-               Kernels.set(gCLKE, srcImages[i], 1.0f);
-               Kernels.set(gCLKE, src2, 2.0f);
-               Kernels.addImages(gCLKE, srcImages[i], src2, dstImages[i]);
-               minMax = Kernels.minMax(gCLKE, dstImages[i], 36);
+            if (srcImages[i] != null) {
+               float[] minMax;
+               try (ClearCLImage src2 = gCLKE.createCLImage(srcImages[i])) {
+                  Kernels.set(gCLKE, srcImages[i], 1.0f);
+                  Kernels.set(gCLKE, src2, 2.0f);
+                  Kernels.addImages(gCLKE, srcImages[i], src2, dstImages[i]);
+                  minMax = Kernels.minMax(gCLKE, dstImages[i], 36);
+               }
+               Assert.assertEquals(3.0f, minMax[0], 0.000001);
             }
-            Assert.assertEquals(3.0f, minMax[0], 0.000001);
          }
          for (int i = 0; i < srcBuffers.length; i++) {
             float[] minMax;
@@ -195,19 +201,21 @@ public class KernelsTests {
          // ensure this will still work with integers
          final float result = x * a + y * b;
          for (int i = 0; i < srcImages.length; i++) {
-            float[] minMax;
-            try (ClearCLImage src2 = gCLKE.createCLImage(srcImages[i])) {
-               Kernels.set(gCLKE, srcImages[i], x);
-               Kernels.set(gCLKE, src2, y);
-               Kernels.addImagesWeighted(gCLKE,
-                       srcImages[i],
-                       src2,
-                       dstImages[i],
-                       a,
-                       b);
-               minMax = Kernels.minMax(gCLKE, dstImages[i], 36);
+            if (srcImages[i] != null) {
+               float[] minMax;
+               try (ClearCLImage src2 = gCLKE.createCLImage(srcImages[i])) {
+                  Kernels.set(gCLKE, srcImages[i], x);
+                  Kernels.set(gCLKE, src2, y);
+                  Kernels.addImagesWeighted(gCLKE,
+                          srcImages[i],
+                          src2,
+                          dstImages[i],
+                          a,
+                          b);
+                  minMax = Kernels.minMax(gCLKE, dstImages[i], 36);
+               }
+               Assert.assertEquals(result, minMax[0], 0.0000001);
             }
-            Assert.assertEquals(result, minMax[0], 0.0000001);
          }
          for (int i = 0; i < srcBuffers.length; i++) {
             float[] minMax;
@@ -233,13 +241,15 @@ public class KernelsTests {
    public void testAddImageAndScalar() throws IOException {
       try {
          for (int i = 0; i < srcImages.length; i++) {
-            Kernels.set(gCLKE, srcImages[i], 1.0f);
-            Kernels.addImageAndScalar(gCLKE,
-                    srcImages[i],
-                    dstImages[i],
-                    4.0f);
-            float minMax[] = Kernels.minMax(gCLKE, dstImages[i], 36);
-            Assert.assertEquals(5.0f, minMax[0], 0.0000001);
+            if (srcImages[i] != null) {
+               Kernels.set(gCLKE, srcImages[i], 1.0f);
+               Kernels.addImageAndScalar(gCLKE,
+                       srcImages[i],
+                       dstImages[i],
+                       4.0f);
+               float minMax[] = Kernels.minMax(gCLKE, dstImages[i], 36);
+               Assert.assertEquals(5.0f, minMax[0], 0.0000001);
+            }
          }
          for (int i = 0; i < srcBuffers.length; i++) {
             Kernels.set(gCLKE, srcBuffers[i], 11.0f);
@@ -282,7 +292,9 @@ public class KernelsTests {
             Kernels.blur(gCLKE, srcBuffers[i], dstBuffers[i], 4.0f, 4.0f);
          }
          for (int i = 0; i < srcImages.length; i++) {
-            Kernels.blur(gCLKE, srcImages[i], dstImages[i], 4.0f, 4.0f);
+            if (srcImages[i] != null) {
+               Kernels.blur(gCLKE, srcImages[i], dstImages[i], 4.0f, 4.0f);
+            }
          }
       } catch (CLKernelException clkExc) {
          Assert.fail(clkExc.getMessage());
@@ -306,16 +318,18 @@ public class KernelsTests {
             }
          }
          for (int i = 0; i < srcImages.length; i++) {
-            try (ClearCLImage mask = gCLKE.createCLImage(srcImages[i])) {
-               Kernels.binaryAnd(gCLKE, srcImages[i], mask, dstImages[i]);
-               Kernels.set(gCLKE, mask, 1.0f);
-               // Check equality between src and dst
-               Kernels.subtractImages(gCLKE,
-                       srcBuffers[i],
-                       dstBuffers[i],
-                       mask);
-               float[] minMax = Kernels.minMax(gCLKE, mask, 36);
-               Assert.assertEquals(minMax[0], minMax[1], 0.0000001);
+            if (srcImages[i] != null) {
+               try (ClearCLImage mask = gCLKE.createCLImage(srcImages[i])) {
+                  Kernels.binaryAnd(gCLKE, srcImages[i], mask, dstImages[i]);
+                  Kernels.set(gCLKE, mask, 1.0f);
+                  // Check equality between src and dst
+                  Kernels.subtractImages(gCLKE,
+                          srcBuffers[i],
+                          dstBuffers[i],
+                          mask);
+                  float[] minMax = Kernels.minMax(gCLKE, mask, 36);
+                  Assert.assertEquals(minMax[0], minMax[1], 0.0000001);
+               }
             }
          }
       } catch (CLKernelException clkExc) {
