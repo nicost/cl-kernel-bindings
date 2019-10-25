@@ -1,4 +1,4 @@
-package org.micromanager.clops.test;
+package org.micromanager.clops;
 
 import static org.junit.Assert.assertEquals;
 
@@ -30,7 +30,7 @@ import org.micromanager.clops.Kernels;
  *
  * @author nico
  */
-public class KernelsTests {
+public class KernelsTest {
 
    private ClearCLContext gCLContext;
    private CLKernelExecutor gCLKE;
