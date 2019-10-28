@@ -2004,7 +2004,7 @@ public class Kernels
     parameters.put("dst_max", dst);
 
     clke.execute(OCLlib.class,
-                 "kernels/projections.cl",
+                 "kernels/maxProjection.cl",
                  "max_project_3d_2d",
                  parameters);
 
@@ -3255,7 +3255,7 @@ public class Kernels
     parameters.put("src", src);
     parameters.put("dst", dst);
     clke.execute(OCLlib.class,
-                 "kernels/sum_projections.cl",
+                 "kernels/sumProject.cl",
                  "sum_project_3d_2d",
                  parameters);
   }

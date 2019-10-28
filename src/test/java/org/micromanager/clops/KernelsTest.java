@@ -22,9 +22,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.micromanager.clops.CLKernelException;
-import org.micromanager.clops.CLKernelExecutor;
-import org.micromanager.clops.Kernels;
 
 /**
  *
@@ -190,6 +187,60 @@ public class KernelsTest {
       }
 
    }
+   
+   
+   @Test
+   public void testProject() throws IOException {
+      try {
+         float[] minMax;
+         final float val = 10.0f;
+         for (int i = 0; i < srcImages.length; i++) {
+            if (srcImages[i] != null) {
+               try (ClearCLImage src = gCLKE.createCLImage(dimensions3D, 
+                       srcImages[i].getChannelDataType())) {
+                  Kernels.set(gCLKE, src, val);
+                  Kernels.sumZProjection(gCLKE, src, dstImages[i]);
+                  minMax = Kernels.minMax(gCLKE, dstImages[i], 36);
+                  Assert.assertEquals(val * zSize, minMax[0], 0.000001);
+                  Kernels.maximumZProjection(gCLKE, src, dstImages[i]);
+                  minMax = Kernels.minMax(gCLKE, dstImages[i], 36);
+                  Assert.assertEquals(val, minMax[1], 0.000001);
+                  Kernels.minimumZProjection(gCLKE, src, dstImages[i]);
+                  minMax = Kernels.minMax(gCLKE, dstImages[i], 36);
+                  Assert.assertEquals(val, minMax[0], 0.000001);
+                  Kernels.meanZProjection(gCLKE, src, dstImages[i]);
+                  minMax = Kernels.minMax(gCLKE, dstImages[i], 36);
+                  Assert.assertEquals(val, minMax[0], 0.000001);
+               }
+            }
+         }
+         for (int i = 0; i < srcBuffers.length; i++) {
+            if (srcBuffers[i] != null) {
+               try (ClearCLBuffer src = gCLKE.createCLBuffer(dimensions3D, 
+                       srcBuffers[i].getNativeType())) {
+                  Kernels.set(gCLKE, src, val);
+                  Kernels.sumZProjection(gCLKE, src, dstBuffers[i]);
+                  minMax = Kernels.minMax(gCLKE, dstBuffers[i], 36);
+                  Assert.assertEquals(val * zSize, minMax[0], 0.000001);
+                  Kernels.maximumZProjection(gCLKE, src, dstBuffers[i]);
+                  minMax = Kernels.minMax(gCLKE, dstBuffers[i], 36);
+                  Assert.assertEquals(val, minMax[1], 0.000001);
+                  Kernels.minimumZProjection(gCLKE, src, dstBuffers[i]);
+                  minMax = Kernels.minMax(gCLKE, dstBuffers[i], 36);
+                  Assert.assertEquals(val, minMax[0], 0.000001);
+                  Kernels.meanZProjection(gCLKE, src, dstBuffers[i]);
+                  minMax = Kernels.minMax(gCLKE, dstBuffers[i], 36);
+                  Assert.assertEquals(val, minMax[0], 0.000001);
+               }
+            }
+         }
+      } catch (CLKernelException clkExc) {
+         Assert.fail(clkExc.getMessage());
+      }
+
+   }
+   
+   
 
    @Test
    public void testAddImagesWeighted() throws IOException {
