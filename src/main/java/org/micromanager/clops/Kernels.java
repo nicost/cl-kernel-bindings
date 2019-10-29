@@ -2069,8 +2069,8 @@ public class Kernels
     clke.execute(OCLlib.class,
                  "kernels/reductions.cl",
                  "reduce_minmax_" + src.getDimension() + "d",
-                 new long[]
-                 { Math.min(size, nrReductions) }, parameters);
+                 new long[] { Math.min(size, nrReductions) }, 
+                 parameters);
 
     mScratchBuffer.copyTo(mScratchHostBuffer, true);
 
