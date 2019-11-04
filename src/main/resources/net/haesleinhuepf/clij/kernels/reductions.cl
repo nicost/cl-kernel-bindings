@@ -1,8 +1,7 @@
 __constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST;
 
 
-__kernel void reduce_minmax_1d( DTYPE_IMAGE_IN_2D src, DTYPE_IMAGE_OUT_2D dst,
-                          long  length)
+__kernel void reduce_minmax_1d( DTYPE_IMAGE_IN_2D src, DTYPE_IMAGE_OUT_2D dst)
 {
   const int width = GET_IMAGE_WIDTH(src);
 
@@ -21,13 +20,12 @@ __kernel void reduce_minmax_1d( DTYPE_IMAGE_IN_2D src, DTYPE_IMAGE_OUT_2D dst,
     maxv = max(maxv, value);
   }
 
-  dst[2*get_global_id(0)+0] = minv;
-  dst[2*get_global_id(0)+1] = maxv;
+  WRITE_IMAGE_2D (dst, (int2)(2* x + 0, 0), minv);
+  WRITE_IMAGE_2D (dst, (int2)(2* x + 1, 0), maxv);
 }
 
 
-__kernel void reduce_minmax_2d( DTYPE_IMAGE_IN_2D src, DTYPE_IMAGE_OUT_2D dst,
-                          long  length)
+__kernel void reduce_minmax_2d( DTYPE_IMAGE_IN_2D src, DTYPE_IMAGE_OUT_2D dst)
 {
   const int width = GET_IMAGE_WIDTH(src);
   const int height = GET_IMAGE_HEIGHT(src);
@@ -52,12 +50,12 @@ __kernel void reduce_minmax_2d( DTYPE_IMAGE_IN_2D src, DTYPE_IMAGE_OUT_2D dst,
     }
   }
 
-  dst[2*get_global_id(0)+0] = minv;
-  dst[2*get_global_id(0)+1] = maxv;
+  WRITE_IMAGE_2D (dst, (int2)(2* x + 0, 0), minv);
+  WRITE_IMAGE_2D (dst, (int2)(2* x + 1, 0), maxv);
+
 }
 
-__kernel void reduce_minmax_3d( DTYPE_IMAGE_IN_3D src, DTYPE_IMAGE_OUT_3D dst,
-                          long  length)
+__kernel void reduce_minmax_3d( DTYPE_IMAGE_IN_3D src, DTYPE_IMAGE_OUT_3D dst)
 {
   const int width = GET_IMAGE_WIDTH(src);
   const int height = GET_IMAGE_HEIGHT(src);
@@ -87,7 +85,7 @@ __kernel void reduce_minmax_3d( DTYPE_IMAGE_IN_3D src, DTYPE_IMAGE_OUT_3D dst,
     }
   }
 
-  dst[2*get_global_id(0)+0] = minv;
-  dst[2*get_global_id(0)+1] = maxv;
+  WRITE_IMAGE_3D (dst, (int4)(2* x + 0, 0, 0, 0), minv);
+  WRITE_IMAGE_3D (dst, (int4)(2* x + 1, 0, 0, 0), maxv);
 }
 

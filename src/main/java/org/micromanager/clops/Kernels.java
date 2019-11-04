@@ -2064,7 +2064,6 @@ public class Kernels
     HashMap<String, Object> parameters = new HashMap<>();
     parameters.put("src", src);
     parameters.put("dst", mScratchBuffer);
-    parameters.put("length", size);
 
     clke.execute(OCLlib.class,
                  "kernels/reductions.cl",
