@@ -201,8 +201,8 @@ public class Kernels
                                      float[] matrix) throws CLKernelException
   {
 
-    ClearCLBuffer matrixCl = clke.createCLBuffer(new long[]
-    { matrix.length, 1, 1 }, NativeTypeEnum.Float);
+    ClearCLBuffer matrixCl = clke.createCLBuffer(
+            new long[] { matrix.length, 1, 1 }, NativeTypeEnum.Float);
 
     FloatBuffer buffer = FloatBuffer.wrap(matrix);
     matrixCl.readFrom(buffer, true);
@@ -1502,52 +1502,45 @@ public class Kernels
    *          maximum value of the input image
    * @throws CLKernelException
    */
-  public static void histogram(CLKernelExecutor clke,
-                               ClearCLImageInterface src,
-                               ClearCLBuffer dstHistogram,
-                               Float minimumGreyValue,
-                               Float maximumGreyValue) throws CLKernelException
-  {
+   public static void histogram(CLKernelExecutor clke,
+           ClearCLImageInterface src,
+           ClearCLBuffer dstHistogram,
+           Float minimumGreyValue,
+           Float maximumGreyValue) throws CLKernelException {
 
-    int stepSizeX = 1;
-    int stepSizeY = 1;
-    int stepSizeZ = 1;
+      int stepSizeX = 1;
+      int stepSizeY = 1;
+      int stepSizeZ = 1;
 
-    long[] globalSizes = new long[]
-    { src.getWidth() / stepSizeZ, 1, 1 };
+      long[] globalSizes = new long[]{src.getWidth() / stepSizeZ, 1, 1};
 
-    long numberOfPartialHistograms = globalSizes[0] * globalSizes[1]
-                                     * globalSizes[2];
-    long[] histogramBufferSize = new long[]
-    { dstHistogram.getWidth(), 1, numberOfPartialHistograms };
+      long numberOfPartialHistograms = globalSizes[0] * globalSizes[1]
+              * globalSizes[2];
+      long[] histogramBufferSize = new long[]{dstHistogram.getWidth(), 1, numberOfPartialHistograms};
 
-    // allocate memory for partial histograms
-    ClearCLBuffer partialHistograms =
-                                    clke.createCLBuffer(histogramBufferSize,
-                                                        dstHistogram.getNativeType());
-
-    //
-    HashMap<String, Object> parameters = new HashMap<>();
-    parameters.put("src", src);
-    parameters.put("dst_histogram", partialHistograms);
-    parameters.put("minimum", minimumGreyValue);
-    parameters.put("maximum", maximumGreyValue);
-    parameters.put("step_size_x", stepSizeX);
-    parameters.put("step_size_y", stepSizeY);
-    if (src.getDimension() > 2)
-    {
-      parameters.put("step_size_z", stepSizeZ);
-    }
-    clke.execute(OCLlib.class,
+      try ( // allocate memory for partial histograms
+              ClearCLBuffer partialHistograms = clke.createCLBuffer(histogramBufferSize,
+                      dstHistogram.getNativeType())) {
+         //
+         HashMap<String, Object> parameters = new HashMap<>();
+         parameters.put("src", src);
+         parameters.put("dst_histogram", partialHistograms);
+         parameters.put("minimum", minimumGreyValue);
+         parameters.put("maximum", maximumGreyValue);
+         parameters.put("step_size_x", stepSizeX);
+         parameters.put("step_size_y", stepSizeY);
+         if (src.getDimension() > 2) {
+            parameters.put("step_size_z", stepSizeZ);
+         }
+         clke.execute(OCLlib.class,
                  "kernels/histogram.cl",
                  "histogram_image_" + src.getDimension() + "d",
                  globalSizes,
                  parameters);
 
-    Kernels.sumZProjection(clke, partialHistograms, dstHistogram);
-
-    partialHistograms.close();
-  }
+         Kernels.sumZProjection(clke, partialHistograms, dstHistogram);
+      }
+   }
 
   /**
    * Calculates a histogram from the input Buffer, and places the histogram
@@ -3467,7 +3460,7 @@ public class Kernels
 
     clke.execute(OCLlib.class,
                  "kernels/phantoms.cl",
-                 "xorfractal",
+                 "xorfractal_" + dst.getDimension() + "d",
                  parameters);
 
   }
@@ -3486,7 +3479,7 @@ public class Kernels
    * @param cy
    *          XORFractal cy parameter
    * @param cz
-   *          XORFractal cz parameter
+   *          XORFractal cz parameter (only for 3D images)
    * @param r
    *          Sphere diameter
    * @throws CLKernelException
@@ -3504,12 +3497,14 @@ public class Kernels
     parameters.put("dst", dst);
     parameters.put("cx", cx);
     parameters.put("cy", cy);
-    parameters.put("cz", cz);
+    if (dst.getDimension() == 3) {
+      parameters.put("cz", cz);
+    }
     parameters.put("r", r);
 
     clke.execute(OCLlib.class,
                  "kernels/phantoms.cl",
-                 "xorsphere",
+                 "xorsphere_" + dst.getDimension() + "d",
                  parameters);
   }
 
@@ -3526,7 +3521,7 @@ public class Kernels
    * @param cy
    *          XORFractal cy parameter
    * @param cz
-   *          XORFractal cz parameter
+   *          XORFractal cz parameter (only for 3D)
    * @param r
    *          Sphere diameter
    * @throws CLKernelException
@@ -3544,59 +3539,17 @@ public class Kernels
     parameters.put("dst", dst);
     parameters.put("cx", cx);
     parameters.put("cy", cy);
-    parameters.put("cz", cz);
+    if (dst.getDimension() == 3) {
+      parameters.put("cz", cz);
+    }
     parameters.put("r", r);
 
     clke.execute(OCLlib.class,
                  "kernels/phantoms.cl",
-                 "sphere",
+                 "sphere_" + dst.getDimension() + "d",
                  parameters);
   }
 
-  /**
-   * A kernel to fill an image with a line
-   * 
-   * *
-   * 
-   * @param clke
-   *          Executor that holds ClearCL context instance
-   * @param dst
-   *          Image to be filled with the line
-   * @param a
-   *          line...
-   * @param b
-   *          TODO
-   * @param c
-   *          TODO
-   * @param d
-   *          TODO
-   * @param r
-   *          TODO
-   * @throws CLKernelException
-   */
-  public static void line(CLKernelExecutor clke,
-                          ClearCLImage dst,
-                          int a,
-                          int b,
-                          int c,
-                          int d,
-                          float r) throws CLKernelException
-  {
-    HashMap<String, Object> parameters = new HashMap<>();
-
-    parameters.clear();
-    parameters.put("dst", dst);
-    parameters.put("a", a);
-    parameters.put("b", b);
-    parameters.put("c", c);
-    parameters.put("d", d);
-    parameters.put("r", r);
-
-    clke.execute(OCLlib.class,
-                 "kernels/phantoms.cl",
-                 "aline",
-                 parameters);
-  }
 
   /////// private functions (utilties) //////
 

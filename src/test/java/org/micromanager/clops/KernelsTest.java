@@ -607,10 +607,11 @@ public class KernelsTest {
          Kernels.xorFractal(gCLKE, dstUShort, 2, 3, 0.2f);
          minMax = Kernels.minMax(gCLKE, dstUShort, 36);
          Assert.assertEquals(0.0f, minMax[0], 0.0000001);
-         Assert.assertEquals(409.0f, minMax[1], 0.00000001);
+         Assert.assertEquals(409.0f, minMax[1], 0.00000001);         
+         Kernels.xorSphere(gCLKE, dstFloat, 0, 0, 0, 40.0f);
          Kernels.xorSphere(gCLKE, dstFloat3D, 0, 0, 0, 40.0f);
+         Kernels.sphere(gCLKE, dstFloat, 0, 0, 0, 40.0f);
          Kernels.sphere(gCLKE, dstFloat3D, 0, 0, 0, 40.0f);
-         Kernels.line(gCLKE, dstFloat3D, 5, 5, 25, 25, 2.0f);
       } catch (CLKernelException clkExc) {
          Assert.fail(clkExc.getMessage());
       }
