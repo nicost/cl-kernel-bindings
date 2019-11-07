@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.micromanager.cl-kernel-bindings</groupId>
+  <groupId>org.micromanager</groupId>
   <artifactId>cl-kernel-bindings</artifactId>
   <packaging>jar</packaging>
   <version>0.1</version>
@@ -59,6 +59,13 @@
 			<id>hslh</id>
 			<url>https://dl.bintray.com/haesleinhuepf/clij</url>
 		</repository>
+		<repository>
+         <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+			<id>valenico</id>
+         <url>https://valelab.ucsf.edu/nstuurman/maven</url>
+		</repository>
 	</repositories>
 
 
@@ -89,7 +96,7 @@
       <dependency>
           <groupId>net.haesleinhuepf</groupId>
           <artifactId>clij-opencl-kernels</artifactId>
-          <version>1.4.0</version>
+          <version>1.4.1</version>
       </dependency>
       <dependency>
           <groupId>net.clearcontrol</groupId>
@@ -98,5 +105,16 @@
           <scope>compile</scope>
       </dependency>
   </dependencies>
+
+   <distributionManagement>
+      <repository>
+         <id>localFiles</id>
+         <name>local maven</name>
+         <url>file:mavenDeploy</url>
+         <layout>default</layout>
+      </repository>
+   </distributionManagement>
+
+
   
 </project>
