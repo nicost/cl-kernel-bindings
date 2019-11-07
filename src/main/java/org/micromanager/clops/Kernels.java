@@ -173,8 +173,10 @@ public class Kernels
     {
       throw new IllegalArgumentException("Error: number of dimensions don't match! (addImageAndScalar)");
     }
+    long dimension = src.getDimension();
+    dimension = dimension < 2l ? 2l : dimension;
     String kAndFname = (new StringBuffer("addWeightedPixelwise_").
-            append(src.getDimension()).append("d")).toString();
+            append(dimension).append("d")).toString();
     clke.execute(OCLlib.class,
                  "kernels/" + kAndFname + ".cl",
                  kAndFname,
@@ -201,23 +203,21 @@ public class Kernels
                                      float[] matrix) throws CLKernelException
   {
 
-    ClearCLBuffer matrixCl = clke.createCLBuffer(
-            new long[] { matrix.length, 1, 1 }, NativeTypeEnum.Float);
-
-    FloatBuffer buffer = FloatBuffer.wrap(matrix);
-    matrixCl.readFrom(buffer, true);
-
-    HashMap<String, Object> parameters = new HashMap<>();
-    parameters.put("input", src);
-    parameters.put("output", dst);
-    parameters.put("mat", matrixCl);
-
-    clke.execute(OCLlib.class,
-                 "kernels/affineTransforms_interpolate.cl",
-                 "affine_interpolate",
-                 parameters);
-
-    matrixCl.close();
+     try (ClearCLBuffer matrixCl = clke.createCLBuffer(
+             new long[] { matrix.length, 1, 1 }, NativeTypeEnum.Float)) {
+        FloatBuffer buffer = FloatBuffer.wrap(matrix);
+        matrixCl.readFrom(buffer, true);
+        
+        HashMap<String, Object> parameters = new HashMap<>();
+        parameters.put("input", src);
+        parameters.put("output", dst);
+        parameters.put("mat", matrixCl);
+        
+        clke.execute(OCLlib.class,
+                "kernels/affineTransforms_interpolate.cl",
+                "affine_interpolate",
+                parameters);
+     }
 
   }
 
@@ -2534,10 +2534,13 @@ public class Kernels
     {
       throw new IllegalArgumentException("Error: number of dimensions don't match! (addImageAndScalar)");
     }
+    
+    long dimensions = src.getDimension();
+    dimensions = dimensions < 2 ? 2l : dimensions;
 
     clke.execute(OCLlib.class,
-                 "kernels/math.cl",
-                 "multiplyPixelwise_" + src.getDimension() + "d",
+                 "kernels/math" + dimensions + "D.cl",
+                 "multiplyPixelwise_" + dimensions + "d",
                  parameters);
   }
 
