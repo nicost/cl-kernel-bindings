@@ -10,10 +10,10 @@ import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.clearcl.ClearCLHostImageBuffer;
 import net.haesleinhuepf.clij.clearcl.ClearCLImage;
 import net.haesleinhuepf.clij.clearcl.interfaces.ClearCLImageInterface;
-import net.haesleinhuepf.clij.OCLlib;
 import net.haesleinhuepf.clij.coremem.buffers.ContiguousBuffer;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.haesleinhuepf.clij.coremem.offheap.OffHeapMemory;
+import org.micromanager.opencl.OCLlib;
 
 
 
