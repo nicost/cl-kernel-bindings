@@ -3,6 +3,7 @@ package org.micromanager.clops;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.nio.ShortBuffer;
 import net.haesleinhuepf.clij.clearcl.ClearCL;
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
 import net.haesleinhuepf.clij.clearcl.ClearCLContext;
@@ -386,6 +387,25 @@ public class KernelsTest {
       } catch (CLKernelException clkExc) {
          Assert.fail(clkExc.getMessage());
       }
+   }
+   
+   @Test
+   public void simpleBufferTest() throws CLKernelException {
+      short[] floatArray = {
+              1, 2,
+              3, 4
+      };
+      ClearCLBuffer buffer = gCLKE.createCLBuffer(new long[]{2,2}, NativeTypeEnum.UnsignedShort);
+
+      buffer.readFrom(ShortBuffer.wrap(floatArray), true);
+
+      float[] minMax = Kernels.minMax(gCLKE, buffer, 2);
+
+      System.out.println("min: " + minMax[0]);
+      System.out.println("max: " + minMax[1]);
+
+      assertEquals(1, minMax[0],0);
+      assertEquals(4, minMax[1], 0);
    }
 
    @Test
