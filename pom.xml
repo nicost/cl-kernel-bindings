@@ -60,11 +60,11 @@
 			<url>https://dl.bintray.com/haesleinhuepf/clij</url>
 		</repository>
 		<repository>
-         <snapshots>
-            <enabled>true</enabled>
-          </snapshots>
-			<id>valenico</id>
-         <url>https://valelab.ucsf.edu/nstuurman/maven</url>
+			 <snapshots>
+			    <enabled>true</enabled>
+			  </snapshots>
+			 <id>valenico</id>
+			 <url>https://valelab4.ucsf.edu/nstuurman/maven</url>
 		</repository>
 	</repositories>
 
@@ -94,9 +94,9 @@
           <scope>test</scope>
       </dependency>
       <dependency>
-          <groupId>net.haesleinhuepf</groupId>
+	      <groupId>org.micromanager</groupId>
           <artifactId>clij-opencl-kernels</artifactId>
-          <version>1.4.1</version>
+          <version>0.1-SNAPSHOT</version>
       </dependency>
       <dependency>
           <groupId>net.clearcontrol</groupId>
