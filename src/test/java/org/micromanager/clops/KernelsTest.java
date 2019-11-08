@@ -390,7 +390,7 @@ public class KernelsTest {
    }
    
    @Test
-   public void simpleBufferTest() throws CLKernelException {
+   public void testMinMaxBufferSimple() throws CLKernelException {
       short[] floatArray = {
               1, 2,
               3, 4
@@ -401,10 +401,7 @@ public class KernelsTest {
 
       float[] minMax = Kernels.minMax(gCLKE, buffer, 2);
 
-      System.out.println("min: " + minMax[0]);
-      System.out.println("max: " + minMax[1]);
-
-      assertEquals(1, minMax[0],0);
+      assertEquals(1, minMax[0], 0);
       assertEquals(4, minMax[1], 0);
    }
 
@@ -439,7 +436,6 @@ public class KernelsTest {
 
          }
       }
-
    }
 
    @Test
