@@ -1,28 +1,28 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.micromanager</groupId>
-  <artifactId>cl-kernel-bindings</artifactId>
-  <packaging>jar</packaging>
-  <version>0.1</version>
-  <name>cl-kernel-bindings</name>
-  <inceptionYear>2019</inceptionYear>
-  <organization>
-      <name>Vale laboratory, University of California, San Francisco, and Howard Hughes Medical Institute
-      </name>
-      <url>https://valelab.ucsf.edu</url>
-  </organization>
-  <licenses>
-      <license>
-          <name>BSD 2-clause</name>
-          <url>https://opensource.org/licenses/bsd-license.php</url>
-      </license>
-  </licenses>
-  <developers>
-      <developer>
-          <name>Nico Stuurman</name>
-      </developer>
-  </developers>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.micromanager</groupId>
+    <artifactId>cl-kernel-bindings</artifactId>
+    <packaging>jar</packaging>
+    <version>0.1.1-SNAPSHOT</version>
+    <name>cl-kernel-bindings</name>
+    <inceptionYear>2019</inceptionYear>
+    <organization>
+        <name>Vale laboratory, University of California, San Francisco, and Howard Hughes Medical Institute
+        </name>
+        <url>https://valelab.ucsf.edu</url>
+    </organization>
+    <licenses>
+        <license>
+            <name>BSD 2-clause</name>
+            <url>https://opensource.org/licenses/bsd-license.php</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Nico Stuurman</name>
+        </developer>
+    </developers>
     <contributors>
         <contributor>
             <name>Robert Haase</name>
@@ -30,90 +30,93 @@
             <url>http://haesleinhuepf.net</url>
         </contributor>
     </contributors>
-  <mailingLists>
-      <mailingList>
-          <name>None</name>
-      </mailingList>
-  </mailingLists>  
-  <scm>
-      <url>https://github.com/nicost/spotIntensityAnalysis/</url>
-  </scm>
-  <issueManagement>
-      <url>https://github.com/nicost/cl-kernel-bindings/issues</url>
-  </issueManagement>
-  <ciManagement><url>none</url></ciManagement>
+    <mailingLists>
+        <mailingList>
+            <name>None</name>
+        </mailingList>
+    </mailingLists>  
+    <scm>
+        <url>https://github.com/nicost/spotIntensityAnalysis/</url>
+    </scm>
+    <issueManagement>
+        <url>https://github.com/nicost/cl-kernel-bindings/issues</url>
+    </issueManagement>
+    <ciManagement>
+        <url>none</url>
+    </ciManagement>
   
-  <url>https://micro-manager.org</url>
-  <description>Bindings to clij opencl kernels for general use in Java applications</description>
-  <properties>
-     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-     <license.licenseName>BSD 2-clause</license.licenseName>
-     <license.copyrightOwners>Regents of the Univeristy of California</license.copyrightOwners>
-  </properties>
+    <url>https://micro-manager.org</url>
+    <description>Bindings to clij opencl kernels for general use in Java applications</description>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <license.licenseName>BSD 2-clause</license.licenseName>
+        <license.copyrightOwners>Regents of the Univeristy of California</license.copyrightOwners>
+    </properties>
 
-	<repositories>
-		<repository>
-         <snapshots>
-            <enabled>true</enabled>
-          </snapshots>
-			<id>hslh</id>
-			<url>https://dl.bintray.com/haesleinhuepf/clij</url>
-		</repository>
-		<repository>
-			 <snapshots>
-			    <enabled>true</enabled>
-			  </snapshots>
-			 <id>valenico</id>
-			 <url>https://valelab4.ucsf.edu/nstuurman/maven</url>
-		</repository>
-	</repositories>
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>hslh</id>
+            <url>https://dl.bintray.com/haesleinhuepf/clij</url>
+        </repository>
+        <repository>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>valenico</id>
+            <url>https://valelab4.ucsf.edu/nstuurman/maven</url>
+        </repository>
+    </repositories>
 
 
-  <build>
-     <plugins>
-        <plugin>
-           <groupId>org.apache.maven.plugins</groupId>
-           <artifactId>maven-compiler-plugin</artifactId>
-           <version>3.3</version>
-           <configuration>
-              <source>1.8</source>
-              <target>1.8</target>
-               <!-- IntelliJ complains about the following: -->
-              <!--<downloadSources>true</downloadSources>
-              <downloadJavadocs>true</downloadJavadocs>-->
-           </configuration>
-        </plugin>
-     </plugins>
-  </build>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <!-- IntelliJ complains about the following: -->
+                    <!--<downloadSources>true</downloadSources>
+                    <downloadJavadocs>true</downloadJavadocs>-->
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
-  <dependencies>
-      <dependency>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
-          <version>4.12</version>
-          <scope>test</scope>
-      </dependency>
-      <dependency>
-	      <groupId>org.micromanager</groupId>
-          <artifactId>clij-opencl-kernels</artifactId>
-          <version>0.1-SNAPSHOT</version>
-      </dependency>
-      <dependency>
-          <groupId>net.clearcontrol</groupId>
-          <artifactId>clij-clearcl</artifactId>
-          <version>0.10.0</version>
-          <scope>compile</scope>
-      </dependency>
-  </dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.micromanager</groupId>
+            <artifactId>clij-opencl-kernels</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>net.clearcontrol</groupId>
+            <artifactId>clij-clearcl</artifactId>
+            <version>0.10.0</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 
-   <distributionManagement>
-      <repository>
-         <id>localFiles</id>
-         <name>local maven</name>
-         <url>file:mavenDeploy</url>
-         <layout>default</layout>
-      </repository>
-   </distributionManagement>
+    <distributionManagement>
+        <repository>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>valenico</id>
+            <url>https://valelab4.ucsf.edu/~nstuurman/maven</url>
+        </repository>
+    </distributionManagement>
 
 
   

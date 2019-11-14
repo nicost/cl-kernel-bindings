@@ -3,6 +3,9 @@ package org.micromanager.clops;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import net.haesleinhuepf.clij.clearcl.ClearCL;
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
@@ -16,13 +19,14 @@ import net.haesleinhuepf.clij.clearcl.enums.ImageChannelDataType;
 import net.haesleinhuepf.clij.clearcl.enums.KernelAccessType;
 import net.haesleinhuepf.clij.clearcl.enums.MemAllocMode;
 import net.haesleinhuepf.clij.clearcl.exceptions.OpenCLException;
-import net.haesleinhuepf.clij.clearcl.ocllib.OCLlib;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.haesleinhuepf.clij.coremem.offheap.OffHeapMemory;
+import net.haesleinhuepf.clij.coremem.util.Size;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.micromanager.opencl.OCLlib;
 
 /**
  *
@@ -54,6 +58,10 @@ public class KernelsTest {
    ClearCLBuffer[] dstBuffers
            = {dstBufFloat, dstBufUByte, dstBufUShort};
    ClearCLImage dstFloat3D;
+   ByteBuffer nioBufUByte;
+   ShortBuffer nioBufUShort;
+   FloatBuffer nioBufFloat;
+   Buffer[] nioBuffers;
 
    @Before
    public void initKernelTests() throws IOException {
@@ -82,14 +90,14 @@ public class KernelsTest {
          srcBufUShort = gCLKE.createCLBuffer(dimensions2D,
                  NativeTypeEnum.UnsignedShort);
          dstBufUShort = gCLKE.createCLBuffer(srcBufUShort);
-       } catch (OpenCLException cle) {
+      } catch (OpenCLException cle) {
          Assert.fail(cle.getMessage());
       } finally {
          srcBuffers = new ClearCLBuffer[]{srcBufFloat, srcBufUByte, srcBufUShort};
          dstBuffers = new ClearCLBuffer[]{dstBufFloat, dstBufUByte, dstBufUShort};
       }
-      
-      try {         
+
+      try {
          srcFloat = gCLKE.createCLImage(dimensions2D,
                  ImageChannelDataType.Float);
          dstFloat = gCLKE.createCLImage(srcFloat);
@@ -99,15 +107,21 @@ public class KernelsTest {
          srcUShort
                  = gCLKE.createCLImage(dimensions2D,
                          ImageChannelDataType.UnsignedInt16);
-         dstUShort = gCLKE.createCLImage(srcUShort);  
+         dstUShort = gCLKE.createCLImage(srcUShort);
          dstFloat3D = gCLKE.createCLImage(dimensions3D,
-                 ImageChannelDataType.Float); 
+                 ImageChannelDataType.Float);
       } catch (OpenCLException cle) {
          System.out.println("Context: " + lBestGPUDevice.getName() + " does not support CLImages");
       } finally {
          srcImages = new ClearCLImage[]{srcFloat, srcUByte, srcUShort};
          dstImages = new ClearCLImage[]{dstFloat, dstUByte, dstUShort};
       }
+      int capacity = (int) (xSize * ySize);
+      nioBufUByte = ByteBuffer.allocate(capacity);
+      nioBufUShort = ShortBuffer.allocate(capacity);
+      nioBufFloat = FloatBuffer.allocate(capacity);
+      nioBuffers = new Buffer[] {nioBufFloat, nioBufUByte, nioBufUShort};
+
 
    }
 
@@ -180,6 +194,40 @@ public class KernelsTest {
                Kernels.set(gCLKE, src2, 2.0f);
                Kernels.addImages(gCLKE, srcBuffers[i], src2, dstBuffers[i]);
                minMax = Kernels.minMax(gCLKE, dstBuffers[i], 36);
+               dstBuffers[i].writeTo(nioBuffers[i], true);  
+               if (nioBuffers[i] instanceof ByteBuffer) {
+                  int min = Integer.MAX_VALUE;
+                  for (int j = 0; j < nioBuffers[i].capacity(); j++) {
+                     int val = nioBufUByte.get(j) & 0xFF;
+                     if (val  < min) {
+                        min = val;
+                     }
+                  }
+                  Assert.assertEquals(3, min);
+               } else if (nioBuffers[i] instanceof ShortBuffer) {
+                  int min = Integer.MAX_VALUE;
+                  int max = Integer.MIN_VALUE;
+                  for (int j = 0; j < nioBuffers[i].capacity(); j++) {
+                     int val = nioBufUShort.get(j) & 0xFFFF;
+                     if (val  < min) {
+                        min = val;
+                     }
+                     if (val > max) {
+                        max = val;
+                     }
+                  }
+                  Assert.assertEquals(3, min);
+                  Assert.assertEquals(3, max);
+               } else if (nioBuffers[i] instanceof FloatBuffer) {
+                  float min = Float.MAX_VALUE;
+                  for (int j = 0; j < nioBuffers[i].capacity(); j++) {
+                     float val = nioBufFloat.get(j);
+                     if (val  < min) {
+                        min = val;
+                     }
+                  }
+                  Assert.assertEquals(3, min, 0.000001);
+               }
             }
             Assert.assertEquals(3.0f, minMax[0], 0.000001);
          }
@@ -188,8 +236,7 @@ public class KernelsTest {
       }
 
    }
-   
-   
+
    @Test
    public void testProject() throws IOException {
       try {
@@ -197,7 +244,7 @@ public class KernelsTest {
          final float val = 10.0f;
          for (int i = 0; i < srcImages.length; i++) {
             if (srcImages[i] != null) {
-               try (ClearCLImage src = gCLKE.createCLImage(dimensions3D, 
+               try (ClearCLImage src = gCLKE.createCLImage(dimensions3D,
                        srcImages[i].getChannelDataType())) {
                   Kernels.set(gCLKE, src, val);
                   Kernels.sumZProjection(gCLKE, src, dstImages[i]);
@@ -217,7 +264,7 @@ public class KernelsTest {
          }
          for (int i = 0; i < srcBuffers.length; i++) {
             if (srcBuffers[i] != null) {
-               try (ClearCLBuffer src = gCLKE.createCLBuffer(dimensions3D, 
+               try (ClearCLBuffer src = gCLKE.createCLBuffer(dimensions3D,
                        srcBuffers[i].getNativeType())) {
                   Kernels.set(gCLKE, src, val);
                   Kernels.sumZProjection(gCLKE, src, dstBuffers[i]);
@@ -240,8 +287,6 @@ public class KernelsTest {
       }
 
    }
-   
-   
 
    @Test
    public void testAddImagesWeighted() throws IOException {
@@ -388,14 +433,14 @@ public class KernelsTest {
          Assert.fail(clkExc.getMessage());
       }
    }
-   
+
    @Test
    public void testMinMaxBufferSimple() throws CLKernelException {
       short[] floatArray = {
-              1, 2,
-              3, 4
+         1, 2,
+         3, 4
       };
-      ClearCLBuffer buffer = gCLKE.createCLBuffer(new long[]{2,2}, NativeTypeEnum.UnsignedShort);
+      ClearCLBuffer buffer = gCLKE.createCLBuffer(new long[]{2, 2}, NativeTypeEnum.UnsignedShort);
 
       buffer.readFrom(ShortBuffer.wrap(floatArray), true);
 
@@ -623,7 +668,7 @@ public class KernelsTest {
          Kernels.xorFractal(gCLKE, dstUShort, 2, 3, 0.2f);
          minMax = Kernels.minMax(gCLKE, dstUShort, 36);
          Assert.assertEquals(0.0f, minMax[0], 0.0000001);
-         Assert.assertEquals(409.0f, minMax[1], 0.00000001);         
+         Assert.assertEquals(409.0f, minMax[1], 0.00000001);
          Kernels.xorSphere(gCLKE, dstFloat, 0, 0, 0, 40.0f);
          Kernels.xorSphere(gCLKE, dstFloat3D, 0, 0, 0, 40.0f);
          Kernels.sphere(gCLKE, dstFloat, 0, 0, 0, 40.0f);
