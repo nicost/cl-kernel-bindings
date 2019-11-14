@@ -21,7 +21,6 @@ import net.haesleinhuepf.clij.clearcl.enums.MemAllocMode;
 import net.haesleinhuepf.clij.clearcl.exceptions.OpenCLException;
 import net.haesleinhuepf.clij.coremem.enums.NativeTypeEnum;
 import net.haesleinhuepf.clij.coremem.offheap.OffHeapMemory;
-import net.haesleinhuepf.clij.coremem.util.Size;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -596,6 +595,50 @@ public class KernelsTest {
       }
    }
 
+    @Test
+   public void testMultiply() throws IOException {
+      try {
+         for (int i = 0; i < srcImages.length; i++) {
+            if (srcImages[i] != null) {
+               float[] minMax;
+               try (ClearCLImage src2 = gCLKE.createCLImage(srcImages[i])) {
+                  Kernels.set(gCLKE, srcImages[i], 2.0f);
+                  Kernels.set(gCLKE, src2, 3.0f);
+                  Kernels.multiplyImages(gCLKE, srcImages[i], src2, dstImages[i]);
+                  minMax = Kernels.minMax(gCLKE, dstImages[i], 36);                  
+                  Assert.assertEquals(6.0f, minMax[0], 0.000001);
+                  // test saturation
+                  if (srcImages[i].getNativeType() == NativeTypeEnum.UnsignedByte) {
+                     Kernels.set(gCLKE, srcImages[i], 200.0f);                     
+                     Kernels.multiplyImages(gCLKE, srcImages[i], src2, dstImages[i]);
+                     minMax = Kernels.minMax(gCLKE, dstImages[i], 36); 
+                     Assert.assertEquals(255.0f, minMax[0], 0.000001);
+                  }
+                  if (srcImages[i].getNativeType() == NativeTypeEnum.UnsignedShort) {
+                     Kernels.set(gCLKE, srcImages[i], 25000.0f);                     
+                     Kernels.multiplyImages(gCLKE, srcImages[i], src2, dstImages[i]);
+                     minMax = Kernels.minMax(gCLKE, dstImages[i], 36); 
+                     Assert.assertEquals(65535.0f, minMax[0], 0.000001);
+                  }
+               }
+            }
+         }
+         for (int i = 0; i < srcBuffers.length; i++) {
+            float[] minMax;
+            try (ClearCLBuffer src2 = gCLKE.createCLBuffer(srcBuffers[i])) {
+               Kernels.set(gCLKE, srcBuffers[i], 3.0f);
+               Kernels.set(gCLKE, src2, 4.0f);
+               Kernels.multiplyImages(gCLKE, srcBuffers[i], src2, dstBuffers[i]);
+               minMax = Kernels.minMax(gCLKE, dstBuffers[i], 36);
+            }
+            Assert.assertEquals(12.0f, minMax[0], 0.000001);
+         }
+      } catch (CLKernelException clkExc) {
+         Assert.fail(clkExc.getMessage());
+      }
+   }
+   
+   
    @Test
    public void testHistogram() {
       try (ClearCLImage lCLImage = gCLKE.createCLImage(dimensions2D,
