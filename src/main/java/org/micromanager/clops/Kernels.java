@@ -1300,7 +1300,7 @@ public class Kernels
     }
 
     clke.execute(OCLlib.class,
-                 "kernels/binaryProcessing.cl",
+                 "kernels/binaryProcessing" + src.getDimension() + "D.cl",
                  "erode_box_neighborhood_" + src.getDimension() + "d",
                  parameters);
   }
