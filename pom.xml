@@ -98,7 +98,7 @@
         <dependency>
             <groupId>org.micromanager</groupId>
             <artifactId>clij-opencl-kernels</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>net.clearcontrol</groupId>

@@ -468,6 +468,34 @@ public class KernelsTest {
          Assert.fail(clkExc.getMessage());
       }
    }
+   
+   @Test
+   public void testDilation() {
+      try {
+         for (int i = 0; i < srcImages.length; i++) {
+            if (srcImages[i] != null) {
+               Kernels.set(gCLKE, srcImages[i], 0.0f);
+               Kernels.setPixel(gCLKE, srcImages[i], 256, 256, 0, 3.0f);
+               Kernels.threshold(gCLKE, srcImages[i], dstImages[i], 1.0f);
+               float[] minMax = Kernels.minMax(gCLKE, dstImages[i], 36);
+               Assert.assertEquals(0.0f, minMax[0], 0.0000001);
+               Assert.assertEquals(1.0f, minMax[1], 0.0000001);
+            }
+         }
+         for (int i = 0; i < srcBuffers.length; i++) {
+            if (srcBuffers[i] != null) {
+               Kernels.set(gCLKE, srcBuffers[i], 0.0f);
+               Kernels.setPixel(gCLKE, srcBuffers[i], 256, 256, 0, 3.0f);
+               Kernels.threshold(gCLKE, srcBuffers[i], dstBuffers[i], 1.0f);
+               float[] minMax = Kernels.minMax(gCLKE, dstBuffers[i], 36);
+               Assert.assertEquals(0.0f, minMax[0], 0.0000001);
+               Assert.assertEquals(1.0f, minMax[1], 0.0000001);
+            }
+         }
+      } catch (CLKernelException clkExc) {
+         Assert.fail(clkExc.getMessage());
+      }
+   }
 
    @Test
    public void testMinMaxBufferSimple() throws CLKernelException {

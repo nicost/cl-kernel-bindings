@@ -1090,7 +1090,7 @@ public class Kernels
       throw new IllegalArgumentException("Error: number of dimensions don't match! (copy)");
     }
     clke.execute(OCLlib.class,
-                 "kernels/binaryProcessing.cl",
+                 "kernels/binaryProcessing" + src.getDimension() + "D.cl",
                  "dilate_box_neighborhood_" + src.getDimension()
                                                 + "d",
                  parameters);
@@ -2956,15 +2956,47 @@ public class Kernels
                  "set_" + clImage.getDimension() + "d",
                  parameters);
   }
-  /*
-  public static void set(CLKernelExecutor clij, ClearCLBuffer clImage, Float value) throws CLKernelException {
-        HashMap<String, Object> parameters = new HashMap<>();
-        parameters.put("dst", clImage);
-        parameters.put("value", value);
-
-        clij.execute(OCLlib.class, "kernels/set.cl", "set_" + clImage.getDimension() + "d", parameters);
+  
+  /**
+   * Sets a specific pixel of input image X to a constant value v.
+   * It uses a very inefficient method to do so, and is here only to facilitate
+   * testing.  CPU-based methods will be much faster
+   * 
+   * f(x) = v
+   * 
+   * @param clke
+   *          Executor that holds ClearCL context instance
+   * @param clImage
+   *          Input image
+    * @param x coordinate of pixel to be set
+    * @param y coordinate of pixel to be set
+    * @param z coordinate of pixel to be set (will be ignored for 2D images)
+   * @param value
+   *          Value to set each element to
+   * @throws CLKernelException
+   */
+   public static void setPixel(CLKernelExecutor clke,
+                         ClearCLImageInterface clImage,
+                         int x,
+                         int y,
+                         int z,
+                         Float value) throws CLKernelException
+  {
+    HashMap<String, Object> parameters = new HashMap<>();
+    parameters.put("dst", clImage);
+    parameters.put("xp", x);
+    parameters.put("yp", y);
+    if (clImage.getDimension() > 2) {
+       parameters.put("zp", z);
     }
-  */
+    parameters.put("value", value);
+
+    clke.execute(OCLlib.class,
+                 "kernels/set.cl",
+                 "set_pixel_" + clImage.getDimension() + "d",
+                 parameters);
+  }
+  
 
   /**
    * Splits a given input image stack into n output image stacks by
