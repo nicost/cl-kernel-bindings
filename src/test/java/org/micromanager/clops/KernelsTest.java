@@ -288,6 +288,42 @@ public class KernelsTest {
    }
 
    @Test
+   public void testThreshold() throws IOException {
+      try {
+         for (int i = 0; i < srcImages.length; i++) {
+            if (srcImages[i] != null) {
+               float[] minMax;
+               Kernels.set(gCLKE, srcImages[i], 3.0f);
+               Kernels.threshold(gCLKE, srcImages[i], dstImages[i], 2.0f);
+               minMax = Kernels.minMax(gCLKE, dstImages[i], 36);
+               Assert.assertEquals(1.0f, minMax[0], 0.0000001f);
+               Kernels.threshold(gCLKE, srcImages[i], dstImages[i], 4.0f);
+               minMax = Kernels.minMax(gCLKE, dstImages[i], 36);
+               Assert.assertEquals(0.0f, minMax[1], 0.0000001f);
+            }
+         }
+         for (int i = 0; i < srcBuffers.length; i++) {
+            if (srcBuffers[i] != null) {
+               float[] minMax;
+               Kernels.set(gCLKE, srcBuffers[i], 3.0f);
+               Kernels.threshold(gCLKE, srcBuffers[i], dstBuffers[i], 2.0f);
+               minMax = Kernels.minMax(gCLKE, dstBuffers[i], 36);
+               Assert.assertEquals(1.0f, minMax[0], 0.0000001f);
+               Kernels.threshold(gCLKE, srcBuffers[i], dstBuffers[i], 4.0f);
+               minMax = Kernels.minMax(gCLKE, dstBuffers[i], 36);
+               Assert.assertEquals(0.0f, minMax[1], 0.0000001f);
+            }
+         }
+      } catch (CLKernelException clkExc) {
+         Assert.fail(clkExc.getMessage());
+      }
+
+   }
+
+    
+   
+   
+   @Test
    public void testAddImagesWeighted() throws IOException {
       try {
          final float x = 3.0f;
@@ -719,6 +755,29 @@ public class KernelsTest {
       } catch (CLKernelException clkExc) {
          Assert.fail(clkExc.getMessage());
       }
+   }
+   
+   @Test
+   public void testNIOTransfer() {
+      int size = 512 * 512;
+      int bytesPerPixel = 2;
+      short val = 1;
+      ShortBuffer source = ShortBuffer.allocate(size);
+      ShortBuffer dest = ShortBuffer.allocate(size);
+      for (int i = 0; i < size; i++) {
+         source.put(i, val);
+      }
+      ClearCLBuffer clBuffer = gCLKE.createCLBuffer(new long[]{512, 512},
+              NativeTypeEnum.UnsignedShort);
+      clBuffer.readFrom(source, new long[]{0, 0}, new long[]{0, 0},
+              new long[]{512, bytesPerPixel * 512}, true);
+      clBuffer.writeTo(dest, true);
+      for (int i = 0; i < size; i++) {
+         if (source.get(i) != dest.get(i)) {
+            Assert.fail("Error moving data cpu > gpu > cpu at index: " + i);
+         }
+      }
+
    }
 
 }

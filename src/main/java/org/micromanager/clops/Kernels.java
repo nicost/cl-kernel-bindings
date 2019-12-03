@@ -3422,10 +3422,12 @@ public class Kernels
     {
       throw new IllegalArgumentException("Error: number of dimensions don't match! (addImageAndScalar)");
     }
+    
+    String clName = "apply_threshold_" + src.getDimension() + "d";
 
     clke.execute(OCLlib.class,
-                 "kernels/thresholding.cl",
-                 "apply_threshold_" + src.getDimension() + "d",
+                 "kernels/" + clName + ".cl",
+                 clName,
                  parameters);
   }
 
